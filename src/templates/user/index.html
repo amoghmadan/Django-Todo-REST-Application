@@ -1,0 +1,150 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div id="root">
+        <main>
+            <div class="text-center">
+                <button class="btn btn-secondary" @click="logIn=!logIn">Log In / Register</button>
+            </div>
+            <div v-if="logIn">
+                <log-in></log-in>
+            </div>
+            <div v-else>
+                <register></register>
+            </div>
+        </main>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script>
+        Vue.component('log-in', {
+            template: `
+                <div class="container text-center">
+                    <h1>Log In</h1>
+                    <div class="d-flex justify-content-center">
+                        <form>
+                            <div class="form-group">
+                                <label for="inputEmail">Email address</label>
+                                <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp" placeholder="Enter email" v-model="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputPassword">Password</label>
+                                <input type="password" class="form-control" id="inputPassword" placeholder="Password" v-model="password" required>
+                            </div>
+                            <button type="button" class="btn btn-primary" @click="logIn()">Log In</button>
+                        </form>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    username: null,
+                    password: null,
+                };
+            },
+            methods: {
+                async logIn() {
+                    try {
+                        let response = await fetch('/api/user/log-in/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                username: this.username,
+                                password: this.password,
+                            }),
+                        });
+                        let data = await response.json();
+                        window.localStorage.setItem('todoAccessToken', data.token);
+                        window.location.replace('/todo');
+                    } catch (err) {
+                        if (err.response.status === 400){
+                            alert('Please mention a valid email or password');
+                            return;
+                        }
+                        alert(err.response.message);
+                    }
+                },
+            },
+            mounted() {
+                if (localStorage.getItem('todoAccessToken')) {
+                    window.location.replace('/todo');
+                }
+            }
+        });
+
+        Vue.component('register', {
+            template: `
+                <div class="container text-center">
+                    <h1>Register</h1>
+                    <div class="d-flex justify-content-center">
+                        <form>
+                            <div class="form-group">
+                                <label for="email">Email address</label>
+                                <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email" v-model="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input type="password" class="form-control" id="password" placeholder="Password" v-model="password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password2">Confirm password</label>
+                                <input type="password" class="form-control" id="password2" placeholder="Confirm password" v-model="password2" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="first_name">First name</label>
+                                <input type="text" class="form-control" id="first_name" aria-describedby="emailHelp" placeholder="First name" v-model="first_name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="last_name">Last name</label>
+                                <input type="text" class="form-control" id="last_name" aria-describedby="emailHelp" placeholder="Last name" v-model="last_name" required>
+                            </div>
+                            <button type="button" class="btn btn-primary" @click="register">Register</button>
+                        </form>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    email: null,
+                    password: null,
+                    password2: null,
+                    first_name: null,
+                    last_name: null,
+                };
+            },
+            methods: {
+                async register() {
+                    try {
+                        let response = await fetch('/api/user/register/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                email: this.email,
+                                password: this.password,
+                                password2: this.password2,
+                                first_name: this.first_name,
+                                last_name: this.last_name,
+                            }),
+                        });
+                        let data = response.json();
+                        console.log(data);
+                    } catch (err) {
+                        alert(err.response.message);
+                    }
+                },
+            },
+        });
+
+        var app = new Vue({
+            el: '#root',
+            data: {
+                logIn: true,
+            },
+        });
+    </script>
+{% endblock %}
