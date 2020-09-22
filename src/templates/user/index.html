@@ -3,6 +3,7 @@
     <div id="root">
         <main>
             <div class="text-center">
+                <h1>Todo</h1>
                 <button class="btn btn-secondary" @click="logIn=!logIn">Log In / Register</button>
             </div>
             <div v-if="logIn">
@@ -21,7 +22,7 @@
         Vue.component('log-in', {
             template: `
                 <div class="container text-center">
-                    <h1>Log In</h1>
+                    <h2>Log In</h2>
                     <div class="d-flex justify-content-center">
                         <form>
                             <div class="form-group">
@@ -78,7 +79,7 @@
         Vue.component('register', {
             template: `
                 <div class="container text-center">
-                    <h1>Register</h1>
+                    <h2>Register</h2>
                     <div class="d-flex justify-content-center">
                         <form>
                             <div class="form-group">
@@ -131,10 +132,14 @@
                                 last_name: this.last_name,
                             }),
                         });
-                        let data = response.json();
-                        console.log(data);
+                        if (response.status === 200) {
+                            alert('Registered Successfully');
+                        } else {
+                            let data = await response.json();
+                            alert(response.statusText);
+                        }
                     } catch (err) {
-                        alert(err.response.message);
+                        alert(err);
                     }
                 },
             },

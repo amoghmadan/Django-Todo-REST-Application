@@ -2,11 +2,178 @@
 
 {% block content %}
 <div id="root">
-
+    <navbar></navbar>
+    <todo :id="user.id" :todos="todos"></todo>
 </div>
 {% endblock %}
 
 {% block js %}
 <script>
+    Vue.component('navbar', {
+        template: `
+            <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
+                <a class="navbar-brand" href="/todo/">Todo</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <!-- li class="nav-item active">
+                            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Link</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Dropdown
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#">Action</a>
+                            <a class="dropdown-item" href="#">Another action</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Something else here</a>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled" href="#">Disabled</a>
+                        </li -->
+                    </ul>
+                    <form class="form-inline my-2 my-lg-0">
+                        <!-- input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" -->
+                        <button class="btn btn-outline-warning my-2 my-sm-0" type="button" @click="logOut">Log Out</button>
+                    </form>
+                </div>
+            </nav>
+        `,
+        methods: {
+            async logOut() {
+                try {
+                    let response = await fetch('/api/user/log-out/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
+                        },
+                        body: JSON.stringify({}),
+                    });
+                    if (response.status === 200) {
+                        localStorage.removeItem('todoAccessToken');
+                        window.location.replace('/');
+                    } else {
+                        alert('Please try again');
+                    }
+                } catch (err) {
+                    alert(err);
+                }
+            },
+        },
+    });
+
+    Vue.component('todo', {
+        delimiters: ['[[', ']]'],
+        props: ['id', 'todos'],
+        template: `
+            <main>
+                <div class="container">
+                    <div class="d-flex justify-content-center">
+                        <form class="form-inline">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="description" aria-describedby="descriptionHelp" placeholder="Description" v-model="description" required>
+                            </div>
+                            <button type="button" class="btn btn-primary" @click="addTodo">Add</button>
+                        </form>
+                    </div>
+                    <div class="center">
+                        <ul class="list-group">
+                            <li class="list-group-item" v-for="i in todos" :key="i.id">[[i.description]]
+                                <button class="btn btn-danger float-right" @click="deleteTodo([[i.id]])">Delete</button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </main>
+        `,
+        data() {
+            return {
+                description: null,
+            };
+        },
+        methods: {
+            async addTodo() {
+                let response = await fetch('/api/todo/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
+                    },
+                    body: JSON.stringify({
+                        description: this.description,
+                        user: this.id,
+                    }),
+                });
+                let data = await response.json();
+                this.description = null;
+                window.location.reload();
+            },
+            async deleteTodo(id) {
+                let response = await fetch(`/api/todo/${id}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
+                    },
+                });
+                let data = await response.json();
+                window.location.reload();
+            },
+        }
+    });
+
+    var app = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#root',
+        data: {
+            user: {},
+            todos: [],
+        },
+        methods: {
+            async getUser() {
+                try {
+                    let response = await fetch('/api/user/details/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
+                        },
+                        body: JSON.stringify({}),
+                    });
+                    if (response.status === 401) {
+                        localStorage.removeItem('todoAccessToken');
+                        window.location.replace('/');
+                    }
+                    let data = await response.json();
+                    this.user = data;
+                } catch (err) {
+                    alert(err);
+                }
+            },
+            async getTodos() {
+                let response = await fetch('/api/todo/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
+                    },
+                });
+                this.todos = await response.json();
+            },
+        },
+        mounted() {
+            this.getUser();
+            this.getTodos();
+        },
+    });
 </script>
 {% endblock %}
