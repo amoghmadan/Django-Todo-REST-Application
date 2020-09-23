@@ -3,7 +3,7 @@
 {% block content %}
 <div id="root">
     <navbar></navbar>
-    <todo :id="user.id" :todos="todos"></todo>
+    <todo :id="user.id"></todo>
 </div>
 {% endblock %}
 
@@ -73,7 +73,7 @@
 
     Vue.component('todo', {
         delimiters: ['[[', ']]'],
-        props: ['id', 'todos'],
+        props: ['id'],
         template: `
             <main>
                 <div class="container">
@@ -97,10 +97,21 @@
         `,
         data() {
             return {
+                todos: [],
                 description: null,
             };
         },
         methods: {
+            async getTodos() {
+                let response = await fetch('/api/todo/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
+                    },
+                });
+                this.todos = await response.json();
+            },
             async addTodo() {
                 let response = await fetch('/api/todo/', {
                     method: 'POST',
@@ -114,8 +125,12 @@
                     }),
                 });
                 let data = await response.json();
-                this.description = null;
-                window.location.reload();
+                if (response.status !== 201) {
+                    alert('Please try again.');
+                } else {
+                    this.description = null;
+                    this.getTodos();
+                }
             },
             async deleteTodo(id) {
                 let response = await fetch(`/api/todo/${id}/`, {
@@ -125,10 +140,16 @@
                         'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
                     },
                 });
-                let data = await response.json();
-                window.location.reload();
+                if (response.status !== 204) {
+                    alert('Please try again.');
+                } else {
+                    this.getTodos();
+                }
             },
-        }
+        },
+        mounted() {
+            this.getTodos();
+        },
     });
 
     var app = new Vue({
@@ -159,20 +180,9 @@
                     alert(err);
                 }
             },
-            async getTodos() {
-                let response = await fetch('/api/todo/', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
-                    },
-                });
-                this.todos = await response.json();
-            },
         },
         mounted() {
             this.getUser();
-            this.getTodos();
         },
     });
 </script>
