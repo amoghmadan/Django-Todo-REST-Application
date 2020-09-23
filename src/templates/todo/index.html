@@ -2,7 +2,7 @@
 
 {% block content %}
 <div id="root">
-    <navbar></navbar>
+    <navbar :user="user"></navbar>
     <todo :id="user.id"></todo>
 </div>
 {% endblock %}
@@ -10,6 +10,8 @@
 {% block js %}
 <script>
     Vue.component('navbar', {
+        delimiters: ['[[', ']]'],
+        props: ['user'],
         template: `
             <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
                 <a class="navbar-brand" href="/todo/">Todo</a>
@@ -42,7 +44,7 @@
                     </ul>
                     <form class="form-inline my-2 my-lg-0">
                         <!-- input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" -->
-                        <button class="btn btn-outline-warning my-2 my-sm-0" type="button" @click="logOut">Log Out</button>
+                        <button class="btn btn-outline-warning my-2 my-sm-0" type="button" @click="logOut">Log Out [[user.first_name]] [[user.last_name]]</button>
                     </form>
                 </div>
             </nav>
