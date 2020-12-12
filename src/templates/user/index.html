@@ -91,8 +91,8 @@
                                 <input type="password" class="form-control" id="password" placeholder="Password" v-model="password" required>
                             </div>
                             <div class="form-group">
-                                <label for="password2">Confirm password</label>
-                                <input type="password" class="form-control" id="password2" placeholder="Confirm password" v-model="password2" required>
+                                <label for="confirm_password">Confirm password</label>
+                                <input type="password" class="form-control" id="confirm_password" placeholder="Confirm password" v-model="confirm_password" required>
                             </div>
                             <div class="form-group">
                                 <label for="first_name">First name</label>
@@ -111,7 +111,7 @@
                 return {
                     email: null,
                     password: null,
-                    password2: null,
+                    confirm_password: null,
                     first_name: null,
                     last_name: null,
                 };
@@ -126,13 +126,14 @@
                             },
                             body: JSON.stringify({
                                 email: this.email,
+                                username: this.email,
                                 password: this.password,
-                                password2: this.password2,
+                                confirm_password: this.confirm_password,
                                 first_name: this.first_name,
                                 last_name: this.last_name,
                             }),
                         });
-                        if (response.status === 200) {
+                        if (response.status === 201) {
                             alert('Registered Successfully');
                         } else {
                             let data = await response.json();

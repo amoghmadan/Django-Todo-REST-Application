@@ -53,14 +53,13 @@
             async logOut() {
                 try {
                     let response = await fetch('/api/user/log-out/', {
-                        method: 'POST',
+                        method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
                         },
-                        body: JSON.stringify({}),
                     });
-                    if (response.status === 200) {
+                    if (response.status === 204) {
                         localStorage.removeItem('todoAccessToken');
                         window.location.replace('/');
                     } else {
@@ -84,38 +83,83 @@
                             <div class="form-group">
                                 <input type="text" class="form-control" id="description" aria-describedby="descriptionHelp" placeholder="Description" v-model="description" required>
                             </div>
-                            <button type="button" class="btn btn-primary" @click="addTodo">Add</button>
+                            <button type="button" class="btn btn-info" @click="addTodo">Add</button>
                         </form>
                     </div>
+                    <div class="btn-group" role="group" aria-label="Basic example">
+                        <button type="button" class="btn btn-primary" @click="getTodos()">All</button>
+                        <button type="button" class="btn btn-primary" v-for="(value, key) in dropdown" @click="getTodos(key)">[[value]]</button>
+                    </div>
                     <div class="center">
-                        <ul class="list-group">
-                            <li class="list-group-item" v-for="i in todos" :key="i.id">[[i.description]]
-                                <button class="btn btn-danger float-right" @click="deleteTodo([[i.id]])">Delete</button>
-                            </li>
-                        </ul>
+                        <table class="table">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">Description</th>
+                                    <th scope="col">Current Status</th>
+                                    <th scope="col">Update Status</th>
+                                    <th scope="col">Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="i in todos" :key="i.id">
+                                    <td>[[i.description]]</td>
+                                    <td>[[i.status_display]]</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                Select
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" v-for="(value, key) in dropdown" :key="key" @click="updateTodo(i.id, key)">[[value]]</a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-danger" @click="deleteTodo([[i.id]])">Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </main>
         `,
         data() {
             return {
+                dropdown: {},
                 todos: [],
                 description: null,
+                status: null,
             };
         },
         methods: {
-            async getTodos() {
-                let response = await fetch('/api/todo/', {
+            async getDropDownValues() {
+                let response = await fetch('/api/task/status-choice/', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
                     },
                 });
-                this.todos = await response.json();
+                this.dropdown = await response.json();
+            },
+            async getTodos(status) {
+                var url = '/api/task/tasks/';
+                if (status) {
+                    url += "?status=" + status;
+                }
+                let response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
+                    },
+                });
+                let data = await response.json();
+                this.todos = data.results;
             },
             async addTodo() {
-                let response = await fetch('/api/todo/', {
+                let response = await fetch('/api/task/tasks/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -134,8 +178,24 @@
                     this.getTodos();
                 }
             },
+            async updateTodo(id, status) {
+                let response = await fetch(`/api/task/tasks/${id}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
+                    },
+                    body: JSON.stringify({status: status}),
+                });
+                console.log(response);
+                if (response.status !== 200) {
+                    alert('Please try again.');
+                } else {
+                    this.getTodos();
+                }
+            },
             async deleteTodo(id) {
-                let response = await fetch(`/api/todo/${id}/`, {
+                let response = await fetch(`/api/task/tasks/${id}/`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
@@ -150,6 +210,7 @@
             },
         },
         mounted() {
+            this.getDropDownValues();
             this.getTodos();
         },
     });
@@ -165,12 +226,11 @@
             async getUser() {
                 try {
                     let response = await fetch('/api/user/details/', {
-                        method: 'POST',
+                        method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
                         },
-                        body: JSON.stringify({}),
                     });
                     if (response.status === 401) {
                         localStorage.removeItem('todoAccessToken');

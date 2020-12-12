@@ -1,4 +1,4 @@
-"""root URL Configuration
+"""tracker URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.2/topics/http/urls/
@@ -14,13 +14,17 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
-from .views import UserIndexView, TodoIndexView
+from django.urls import include, path
+from . import views
+
+api_patterns = [
+    path('user/', include('user.urls')),
+    path('task/', include('task.urls')),
+]
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', UserIndexView.as_view()),
-    path('todo/', TodoIndexView.as_view()),
-    path('api/user/', include('user.urls')),
-    path('api/todo/', include('todo.urls')),
+    path('', views.IndexView.as_view()),
+    path('todo/', views.TodoView.as_view()),
+    path('api/', include(api_patterns)),
 ]

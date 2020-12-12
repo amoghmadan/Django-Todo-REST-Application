@@ -2,7 +2,7 @@ from django import views
 from django.shortcuts import render
 
 
-class UserIndexView(views.View):
+class IndexView(views.View):
     """."""
 
     template_name = 'user/index.html'
@@ -13,7 +13,7 @@ class UserIndexView(views.View):
         return render(request, self.template_name)
 
 
-class TodoIndexView(UserIndexView):
+class TodoView(IndexView):
     """."""
 
     template_name = 'todo/index.html'
