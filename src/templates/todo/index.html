@@ -92,8 +92,8 @@
                         </form>
                     </div>
                     <div class="btn-group" role="group" aria-label="Basic example">
-                        <button type="button" class="btn btn-primary" @click="status='all';getTodos()">All</button>
-                        <button type="button" class="btn btn-primary" v-for="(value, key) in dropdown" @click="status=key;getTodos()">[[value]]</button>
+                        <button type="button" class="btn btn-primary" @click="status='all';page=1;getTodos()">All</button>
+                        <button type="button" class="btn btn-primary" v-for="(value, key) in dropdown" @click="status=key;page=1;getTodos()">[[value]]</button>
                     </div>
                     <div class="center">
                         <table class="table">
