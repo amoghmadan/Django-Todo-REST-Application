@@ -49,15 +49,20 @@
                 </div>
             </nav>
         `,
+        data() {
+            return {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
+                },
+            };
+        },
         methods: {
             async logOut() {
                 try {
                     let response = await fetch('/api/user/log-out/', {
                         method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
-                        },
+                        headers: this.headers,
                     });
                     if (response.status === 204) {
                         localStorage.removeItem('todoAccessToken');
@@ -94,16 +99,14 @@
                         <table class="table">
                             <thead class="thead-dark">
                                 <tr>
-                                    <th scope="col">Description</th>
-                                    <th scope="col">Current Status</th>
-                                    <th scope="col">Update Status</th>
-                                    <th scope="col">Remove</th>
+                                    <th scope="col" v-for="head in heads">[[head]]</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="i in todos" :key="i.id">
                                     <td>[[i.description]]</td>
                                     <td>[[i.status_display]]</td>
+                                    <td>[[new Date(i.created_at).toLocaleString()]]</td>
                                     <td>
                                         <div class="btn-group">
                                             <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -114,6 +117,7 @@
                                             </div>
                                         </div>
                                     </td>
+                                    <td>[[new Date(i.updated_at).toLocaleString()]]</td>
                                     <td>
                                         <button class="btn btn-danger" @click="deleteTodo([[i.id]])">Delete</button>
                                     </td>
@@ -126,34 +130,34 @@
         `,
         data() {
             return {
+                heads: ['Description', 'Current Status', 'Created Date', 'Update Status', 'Updated Date', 'Remove'],
+                page: 1,
                 dropdown: {},
                 todos: [],
                 description: null,
                 status: null,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
+                },
             };
         },
         methods: {
             async getDropDownValues() {
                 let response = await fetch('/api/task/status-choice/', {
                     method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
-                    },
+                    headers: this.headers,
                 });
                 this.dropdown = await response.json();
             },
             async getTodos(status) {
-                var url = '/api/task/tasks/';
+                var url = '/api/task/tasks/?page=' + this.page;
                 if (status) {
                     url += "?status=" + status;
                 }
                 let response = await fetch(url, {
                     method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
-                    },
+                    headers: this.headers,
                 });
                 let data = await response.json();
                 this.todos = data.results;
@@ -161,10 +165,7 @@
             async addTodo() {
                 let response = await fetch('/api/task/tasks/', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
-                    },
+                    headers: this.headers,
                     body: JSON.stringify({
                         description: this.description,
                         user: this.id,
@@ -181,26 +182,20 @@
             async updateTodo(id, status) {
                 let response = await fetch(`/api/task/tasks/${id}/`, {
                     method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
-                    },
+                    headers: this.headers,
                     body: JSON.stringify({status: status}),
                 });
                 console.log(response);
                 if (response.status !== 200) {
                     alert('Please try again.');
                 } else {
-                    this.getTodos();
+                    this.getTodos(status);
                 }
             },
             async deleteTodo(id) {
                 let response = await fetch(`/api/task/tasks/${id}/`, {
                     method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
-                    },
+                    headers: this.headers,
                 });
                 if (response.status !== 204) {
                     alert('Please try again.');
@@ -210,6 +205,7 @@
             },
         },
         mounted() {
+            this.page = Number(new URLSearchParams(window.location.search).get('page')) || 1;
             this.getDropDownValues();
             this.getTodos();
         },

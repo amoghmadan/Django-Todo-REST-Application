@@ -42,6 +42,9 @@
                 return {
                     username: null,
                     password: null,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                 };
             },
             methods: {
@@ -49,9 +52,7 @@
                     try {
                         let response = await fetch('/api/user/log-in/', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
+                            headers: this.headers,
                             body: JSON.stringify({
                                 username: this.username,
                                 password: this.password,
@@ -114,6 +115,9 @@
                     confirm_password: null,
                     first_name: null,
                     last_name: null,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                 };
             },
             methods: {
@@ -121,9 +125,7 @@
                     try {
                         let response = await fetch('/api/user/register/', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
+                            headers: this.headers,
                             body: JSON.stringify({
                                 email: this.email,
                                 username: this.email,
@@ -137,7 +139,7 @@
                             alert('Registered Successfully');
                         } else {
                             let data = await response.json();
-                            alert(data);
+                            alert(data.detail);
                         }
                     } catch (err) {
                         alert(err);
