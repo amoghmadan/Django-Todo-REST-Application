@@ -85,17 +85,19 @@
                 <div class="container">
                     <div class="d-flex justify-content-center">
                         <form class="form-inline">
-                            <div class="form-group">
+                            <div class="col-auto my-1">
                                 <input type="text" class="form-control" id="description" aria-describedby="descriptionHelp" placeholder="Description" v-model="description" required>
                             </div>
-                            <button type="button" class="btn btn-info" @click="addTodo">Add</button>
+                            <div>
+                                <button type="button" class="btn btn-info" @click="addTodo">Add</button>
+                            </div>
                         </form>
                     </div>
                     <div class="btn-group" role="group" aria-label="Basic example">
                         <button type="button" class="btn btn-primary" @click="status='all';page=1;getTodos()">All</button>
                         <button type="button" class="btn btn-primary" v-for="(value, key) in dropdown" @click="status=key;page=1;getTodos()">[[value]]</button>
                     </div>
-                    <div class="center">
+                    <div class="table-responsive center">
                         <table class="table">
                             <thead class="thead-dark">
                                 <tr>
