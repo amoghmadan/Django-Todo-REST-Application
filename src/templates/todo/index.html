@@ -92,8 +92,8 @@
                         </form>
                     </div>
                     <div class="btn-group" role="group" aria-label="Basic example">
-                        <button type="button" class="btn btn-primary" @click="getTodos()">All</button>
-                        <button type="button" class="btn btn-primary" v-for="(value, key) in dropdown" @click="getTodos(key)">[[value]]</button>
+                        <button type="button" class="btn btn-primary" @click="status='all';getTodos()">All</button>
+                        <button type="button" class="btn btn-primary" v-for="(value, key) in dropdown" @click="status=key;getTodos()">[[value]]</button>
                     </div>
                     <div class="center">
                         <table class="table">
@@ -125,6 +125,16 @@
                             </tbody>
                         </table>
                     </div>
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-end">
+                            <li class="page-item">
+                            <a class="page-link" @click="getPreviousPage">Previous</a>
+                            </li>
+                            <li class="page-item"><a class="page-link" href="#">[[page]]</a></li>
+                            <a class="page-link" @click="getNextPage">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             </main>
         `,
@@ -135,7 +145,7 @@
                 dropdown: {},
                 todos: [],
                 description: null,
-                status: null,
+                status: 'all',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Token ${localStorage.getItem('todoAccessToken')}`,
@@ -150,17 +160,39 @@
                 });
                 this.dropdown = await response.json();
             },
-            async getTodos(status) {
+            async getTodos() {
                 var url = '/api/task/tasks/?page=' + this.page;
-                if (status) {
-                    url += "&status=" + status;
+                if (this.status !== 'all') {
+                    url += "&status=" + this.status;
                 }
                 let response = await fetch(url, {
                     method: 'GET',
                     headers: this.headers,
                 });
-                let data = await response.json();
-                this.todos = data.results;
+                if (response.status === 404) {
+                    this.page -= 1;
+                    alert("Nothing to show");
+                    this.getTodos();
+                } else if (response.status === 200) {
+                    let data = await response.json();
+                    this.count = data.count;
+                    this.todos = data.results;
+                } else {
+                    alert("Something went wrong");
+                }
+            },
+            async getNextPage() {
+                this.page += 1;
+                this.getTodos();
+            },
+            async getPreviousPage() {
+                previousPage = this.page - 1;
+                if (previousPage === 0) {
+                    alert("Nothing to show");
+                } else {
+                    this.page -= 1;
+                }
+                this.getTodos();
             },
             async addTodo() {
                 let response = await fetch('/api/task/tasks/', {
