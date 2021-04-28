@@ -1,40 +1,35 @@
 from django.contrib.auth.models import User
-from rest_framework import permissions, status, views, viewsets
-from rest_framework.response import Response
+from rest_framework import generics, permissions
 from rest_framework.authtoken.models import Token
 
 from .serializers import UserSerializer
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserRegisterView(generics.CreateAPIView):
     """."""
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
-    http_method_names = ['post']
 
 
-class UserDetailView(views.APIView):
+class UserDetailView(generics.RetrieveAPIView):
     """."""
 
     serializer_class = UserSerializer
 
-    def get(self, request, *args, **kwargs):
+    def get_object(self):
         """."""
 
-        serializer = self.serializer_class(request.user)
-        return Response(serializer.data, status.HTTP_200_OK)
+        return self.request.user
 
 
-class UserLogOutView(views.APIView):
+class UserLogOutView(generics.DestroyAPIView):
     """."""
 
-    model = Token
+    queryset = Token.objects.all()
 
-    def delete(self, request, *args, **kwargs):
+    def get_object(self):
         """."""
 
-        token = self.model.objects.get(user=request.user)
-        token.delete()
-        return Response({'detail': 'Logged Out Successfully'}, status.HTTP_204_NO_CONTENT)
+        return self.queryset.get(user=self.request.user)

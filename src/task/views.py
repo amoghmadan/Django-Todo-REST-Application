@@ -1,6 +1,5 @@
 from django.db.models import QuerySet
-from rest_framework import status, views, viewsets
-from rest_framework.response import Response
+from rest_framework import generics, viewsets
 
 from .models import Task
 from .serializers import TaskStatusChoiceSerializer, TaskSerializer
@@ -8,16 +7,15 @@ from .filters import TaskFilterSet
 from .pagination import TaskPagination
 
 
-class TaskStatusChoiceView(views.APIView):
+class TaskStatusChoiceView(generics.RetrieveAPIView):
     """."""
 
     serializer_class = TaskStatusChoiceSerializer
 
-    def get(self, request, *args, **kwargs):
+    def get_object(self):
         """."""
 
-        serializer = self.serializer_class({})
-        return Response(serializer.data, status.HTTP_200_OK)
+        return {}
 
 
 class TaskViewSet(viewsets.ModelViewSet):

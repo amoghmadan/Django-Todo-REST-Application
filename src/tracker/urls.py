@@ -1,7 +1,7 @@
 """tracker URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/2.2/topics/http/urls/
+    https://docs.djangoproject.com/en/3.2/topics/http/urls/
 Examples:
 Function views
     1. Add an import:  from my_app import views
@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from . import views
+from django.views import generic
 
 api_patterns = [
     path('user/', include('user.urls')),
@@ -24,7 +24,7 @@ api_patterns = [
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.IndexView.as_view()),
-    path('todo/', views.TodoView.as_view()),
+    path('', generic.TemplateView.as_view(template_name='user/index.html')),
+    path('todo/', generic.TemplateView.as_view(template_name='todo/index.html')),
     path('api/', include(api_patterns)),
 ]

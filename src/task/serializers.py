@@ -5,7 +5,7 @@ from .models import Task
 
 
 TaskStatusChoiceSerializer = type('TaskStatusChoiceSerializer', (serializers.Serializer, ), {
-    key: serializers.CharField(default=value) for key, value in dict(choices.TASK_STATUS_CHOICE).items()
+    key: serializers.CharField(default=value, read_only=True) for key, value in choices.TASK_STATUS_CHOICE
 })
 
 

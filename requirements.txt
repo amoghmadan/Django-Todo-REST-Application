@@ -1,6 +1,10 @@
-Django==2.2.17
-django-cors-headers==3.5.0
+asgiref==3.3.4
+certifi==2020.12.5
+Django==3.2
+django-cors-headers==3.7.0
 django-filter==2.4.0
-djangorestframework==3.12.2
+djangorestframework==3.12.4
+gunicorn==20.1.0
 pytz==2020.4
 sqlparse==0.4.1
+urllib3==1.26.4
