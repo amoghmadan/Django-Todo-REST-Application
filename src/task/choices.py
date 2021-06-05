@@ -1,11 +1,11 @@
-TODO = 'todo'
-WIP = 'wip'
-ON_HOLD = 'on_hold'
-DONE = 'done'
+from django.db import models
+from django.utils.translation import gettext_lazy as _
 
-TASK_STATUS_CHOICE = [
-    (TODO, 'Todo'),
-    (WIP, 'Work in Progress'),
-    (ON_HOLD, 'On Hold'),
-    (DONE, 'Done'),
-]
+
+class TaskStatus(models.TextChoices):
+    """Types of Task Status"""
+
+    TODO = "todo", _("Todo")
+    WIP = "wip", _("Work in Progress")
+    ON_HOLD = "on_hold", _("On Hold")
+    DONE = "done", _("Done")
